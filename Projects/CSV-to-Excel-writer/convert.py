@@ -1,49 +1,36 @@
-#!python3
-# -*- coding: utf-8 -*-
-
 import openpyxl
 import sys
 
-#inputs
-print("This programme writes the data in any Comma-separated value file (such as: .csv or .data) to a Excel file.")
-print("The input and output files must be in the same directory of the python file for the programme to work.\n")
+def main():
+    print("This program writes data from a CSV file to an Excel file.")
+    
+    csv_name = input("Enter the name of the CSV file (with the extension): ")
+    sep = input("Enter the separator used in the CSV file: ")
+    excel_name = input("Enter the name of the Excel file (with the extension): ")
+    sheet_name = input("Enter the name of the Excel sheet for output: ")
 
-csv_name = input("Name of the CSV file for input (with the extension): ")
-sep = input("Seperator of the CSV file: ")
-excel_name = input("Name of the excel file for output (with the extension): ")
-sheet_name = input("Name of the excel sheet for output: ")
+    try:
+        wb = openpyxl.load_workbook(excel_name)
+        sheet = wb[sheet_name]
+        with open(csv_name, "r", encoding="utf-8") as file:
+            write_data_to_excel(file, sheet, sep)
+        wb.save(excel_name)
+        print("Data has been successfully written to", excel_name)
+    except Exception as e:
+        print("Error:", str(e))
+        sys.exit(1)
 
-#opening the files
-try:
-	wb = openpyxl.load_workbook(excel_name)
-	sheet = wb.get_sheet_by_name(sheet_name)
+def write_data_to_excel(csv_file, excel_sheet, separator):
+    row = 1
 
-	file = open(csv_name,"r",encoding = "utf-8")
-except:
-	print("File Error!")
-	sys.exit()
+    for line in csv_file:
+        line = line.rstrip('\n')
+        data = line.split(separator)
 
-#rows and columns
-row = 1
-column = 1
+        for column, value in enumerate(data, 1):
+            excel_sheet.cell(row=row, column=column).value = value
 
-#for each line in the file
-for line in file:
-	#remove the \n from the line and make it a list with the seperator
-	line = line[:-1]
-	line = line.split(sep)
+        row += 1
 
-	#for each data in the line
-	for data in line:
-		#write the data to the cell
-		sheet.cell(row,column).value = data
-		#after each data column number increases by 1
-		column += 1
-
-	#to write the next line column number is set to 1 and row number is increased by 1
-	column = 1
-	row += 1
-
-#saving the excel file and closing the csv file
-wb.save(excel_name)
-file.close()
+if __name__ == "__main__":
+    main()
